@@ -129,16 +129,19 @@ class L2NormPenaltyNode(object):
         self.w = w
 
     def forward(self):
-        ## Your code
-        pass
+        self.out = self.l2_reg * np.dot(self.w.out,self.w.out)
+        self.d_out = np.zeros(self.out.shape)
+        return self.out
 
     def backward(self):
-        ## Your code
-        pass
+        d_w = 2 * self.w.out * self.l2_reg * self.d_out
+        self.w.d_out += d_w
+        return self.d_out
+        
 
     def get_predecessors(self):
         ## Your code
-        pass
+        return [self.w]
 
 
 class SumNode(object):
@@ -157,16 +160,19 @@ class SumNode(object):
         self.a = a
 
     def forward(self):
-        # Your code
-        pass
+        self.out = self.a.out + self.b.out
+        self.d_out = np.zeros(self.out.shape)
+        return self.out
 
     def backward(self):
-        # Your code
-        pass
+        #Derivative of a+b with respect to either is just 1
+        self.a.d_out += self.d_out
+        self.b.d_out += self.d_out
+        return self.d_out
 
     def get_predecessors(self):
         # Your code
-        pass
+        return [self.a,self.b]
 
 
 class AffineNode(object):
