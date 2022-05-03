@@ -183,7 +183,36 @@ class AffineNode(object):
         x: node for which x.out is a numpy array of shape (d)
         b: node for which b.out is a numpy array of shape (m) (i.e. vector of length m)
     """
-    pass
+    def __init__(self, W, x, b,node_name):
+        """ 
+        Parameters:
+        W: node for which w.out is a numpy matrix
+        x: node for which a.out is a numpy array
+        b: node for which b.out is a numpy array of the same shape as a
+        node_name: node's name (a string)
+        """
+        self.node_name = node_name
+        self.out = None
+        self.d_out = None
+        self.W = W
+        self.b = b
+        self.x = x
+
+    def forward(self):
+        self.out = np.matmul(self.W.out, self.x.out) + self.b.out
+        self.d_out = np.zeros(self.out.shape)
+        return self.out
+
+    def backward(self):
+        #Use derivatives we calculated in homework
+        self.W.d_out = np.ma.outer(self.d_out, self.x.out)
+        self.b.d_out = self.d_out
+        self.x.d_out = np.matmul(self.W.out.T, self.d_out)
+        return self.d_out
+
+    def get_predecessors(self):
+        # Your code
+        return [self.W,self.b,self.x]
 
 
 class TanhNode(object):
@@ -191,8 +220,30 @@ class TanhNode(object):
         Parameters:
         a: node for which a.out is a numpy array
     """
-    pass
+    def __init__(self, a,node_name):
+        """ 
+        Parameters:
+        a: node for which a.out is a numpy array
+        node_name: node's name (a string)
+        """
+        self.node_name = node_name
+        self.out = None
+        self.d_out = None
+        self.a = a
 
+    def forward(self):
+        self.out = np.tanh(self.a.out)
+        self.d_out = np.zeros(self.out.shape)
+        return self.out
+
+    def backward(self):
+        #Use derivatives we calculated in homework
+        self.a.d_out = 1 - (self.out**2)
+        return self.d_out
+
+    def get_predecessors(self):
+        # Your code
+        return [self.a]
 
 class SoftmaxNode(object):
     """ Softmax node
