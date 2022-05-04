@@ -24,6 +24,7 @@ Philipp Meerkamp, Pierre Garapon, and David Rosenberg.
 License: Creative Commons Attribution 4.0 International License
 """
 
+from turtle import forward
 import numpy as np
 
 
@@ -238,7 +239,7 @@ class TanhNode(object):
 
     def backward(self):
         #Use derivatives we calculated in homework
-        self.a.d_out = 1 - (self.out**2)
+        self.a.d_out = self.d_out * (1 - (self.out**2))
         return self.d_out
 
     def get_predecessors(self):
@@ -250,8 +251,26 @@ class SoftmaxNode(object):
         Parameters:
         z: node for which z.out is a numpy array
     """
-    pass
+    def __init__(self,z,node_name) -> None:
+        self.node_name = node_name
+        self.z = z
+        self.d_out = None
+        self.out = None 
 
+    def forward(self):
+        self.out = np.exp(self.z.out) /  np.sum(np.exp(self.z.out))
+        self.d_out = np.zeros(self.out.shape)
+        return self.out
+
+    def backward(self):
+        jacobian = -np.outer(self.out, self.out)
+        np.fill_diagonal(jacobian, self.out*(1-self.out))
+        self.z.d_out = self.d_out @ jacobian
+        # self.z.d_out = self.d_out * (np.exp(self.z.out) * (1-np.exp(self.z.out)))
+        return self.d_out
+
+    def get_predecessors(self):
+        return [self.z]
 
 class NLLNode(object):
     """ Node computing NLL loss between 2 arrays.
@@ -259,4 +278,25 @@ class NLLNode(object):
         y_hat: a node that contains all predictions
         y_true: a node that contains all labels
     """
-    pass
+    def __init__(self,y_hat,y_true,node_name) -> None:
+        self.out = None
+        self.d_out = None
+        self.y_hat = y_hat
+        self.y_true = y_true
+        self.node_name = node_name
+        self.temp = None
+        
+    def forward(self):    
+        self.temp = self.y_hat.out[self.y_true.out]
+        self.out = -np.log(self.temp)
+        self.d_out = np.zeros(self.out.shape)
+        return self.out
+
+    def backward(self):
+        self.temp2 = np.zeros(self.y_hat.out.shape)
+        self.temp2[self.y_true.out] = -1*(self.temp**-1)
+        self.y_hat.d_out = self.d_out * self.temp2
+        return self.d_out
+
+    def get_predecessors(self):
+        return [self.y_hat,self.y_true]
