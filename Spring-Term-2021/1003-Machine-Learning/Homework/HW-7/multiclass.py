@@ -21,8 +21,8 @@ def calculate_nll(y_preds, y):
 
 class MulticlassClassifier(BaseEstimator, RegressorMixin):
     """ Multiclass prediction """
-
-    def __init__(self, num_hidden_units=10, step_size=.005, init_param_scale=0.01, max_num_epochs=1000, num_class=3):
+    def __init__(self, num_hidden_units=10, step_size=.005, init_param_scale=0.01, 
+                                                max_num_epochs=1000, num_class=3):
         self.num_hidden_units = num_hidden_units
         self.init_param_scale = init_param_scale
         self.max_num_epochs = max_num_epochs
@@ -62,7 +62,8 @@ class MulticlassClassifier(BaseEstimator, RegressorMixin):
 
         # Build Computation Graph
         self.graph = graph.ComputationGraphFunction(
-            inputs=self.inputs, outcomes=self.outcomes, parameters=self.parameters, prediction=self.prediction, objective=self.objective)
+            inputs=self.inputs, outcomes=self.outcomes, parameters=self.parameters, 
+            prediction=self.prediction, objective=self.objective)
 
     def fit(self, X, y):
         num_instances, num_ftrs = X.shape

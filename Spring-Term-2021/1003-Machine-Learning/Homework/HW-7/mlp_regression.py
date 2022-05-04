@@ -11,37 +11,30 @@ import pdb
 
 class MLPRegression(BaseEstimator, RegressorMixin):
     """ MLP regression with computation graph """
-
     def __init__(self, num_hidden_units=10, step_size=.005, init_param_scale=0.01, max_num_epochs=5000):
+        #Given Params
         self.num_hidden_units = num_hidden_units
         self.init_param_scale = init_param_scale
         self.max_num_epochs = max_num_epochs
         self.step_size = step_size
-
-        # Build computation graph
-        # TODO: ADD YOUR CODE HERE
-
+        #Value Nodes
         self.y = nodes.ValueNode(node_name="y")  # to hold a vector input
         self.x = nodes.ValueNode(node_name="x")  # to hold a vector input
-        # to hold the parameter vector
         self.W1 = nodes.ValueNode(node_name="W1")
-        # to hold the parameter vector
         self.w2 = nodes.ValueNode(node_name="w2")
-        # to hold the bias parameter (scalar)
         self.b1 = nodes.ValueNode(node_name="b1")
-        # to hold the bias parameter (scalar)
         self.b2 = nodes.ValueNode(node_name="b2")
-
+        #Package Arguments
         self.inputs = [self.x]
         self.outcomes = [self.y]
         self.parameters = [self.W1, self.b1, self.w2, self.b2]
-
+        #Transformation Nodes
         self.matrixAffineNode = nodes.AffineNode(
             W=self.W1, x=self.x, b=self.b1, node_name="Matrix-Vector Affine Node")
         self.tanh = nodes.TanhNode(
             a=self.matrixAffineNode, node_name="TanH node")
         self.prediction = nodes.VectorScalarAffineNode(
-            x=self.tanh, b=self.b2,w=self.w2, node_name="Vector Scalar Affine Prediction Node")
+            x=self.tanh, b=self.b2, w=self.w2, node_name="Vector Scalar Affine Prediction Node")
         self.objective = nodes.SquaredL2DistanceNode(
             a=self.prediction, b=self.y, node_name="Squared Distance Node")
         self.graph = graph.ComputationGraphFunction(self.inputs, self.outcomes,
