@@ -139,7 +139,6 @@ class L2NormPenaltyNode(object):
         self.w.d_out += d_w
         return self.d_out
         
-
     def get_predecessors(self):
         ## Your code
         return [self.w]
@@ -266,7 +265,6 @@ class SoftmaxNode(object):
         jacobian = -np.outer(self.out, self.out)
         np.fill_diagonal(jacobian, self.out*(1-self.out))
         self.z.d_out = self.d_out @ jacobian
-        # self.z.d_out = self.d_out * (np.exp(self.z.out) * (1-np.exp(self.z.out)))
         return self.d_out
 
     def get_predecessors(self):

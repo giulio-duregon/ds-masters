@@ -23,8 +23,7 @@ class RidgeRegression(BaseEstimator, RegressorMixin):
                                                node_name="square loss")
         self.reg_loss = nodes.L2NormPenaltyNode(l2_reg=l2_reg, w=self.w,node_name = "reg_loss")
         self.loss = nodes.SumNode(a = self.objective,b = self.reg_loss, node_name="loss")
-        # Build computation graph
-        # TODO: ADD YOUR CODE HERE
+        
         self.inputs = [self.x]
         self.outcomes = [self.y]
         self.parameters = [self.w, self.b]
