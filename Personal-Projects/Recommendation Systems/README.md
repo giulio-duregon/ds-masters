@@ -1,6 +1,4 @@
-# Coding README
-
-## Project Overview
+# Project Overview
 
 This project was a collaboration between Giulio Duregon, Jonah Potzobutt, and Joby George. For detailed methodology, model analysis, and metric evaluation please refer to the report folder. Below are instructions on how to run the code on NYU's HPC cluster.
 
@@ -10,7 +8,7 @@ After connecting to NYU's HPC, navigate to the directory with this repository an
 
 To create Training, Validation, and Test splits run the `make_train_val_test_splits.py` file. If you need to access the splits in your `hdfs` filesystem, they are named with the following convention: `<dataset_size>-<name_of_set>` For example, `small-train.csv`. Training is named differently depending on model type, for example `"als-small-train.csv"`.
 
-To train and evaluate a model on either the validation or test splits, use `run_model.py`.
+To train and evaluate the ALS or Baseline Recommendation System models on validation splits, use `run_model.py`.
 
 ## Spark Execution on the Cluster
 
@@ -33,7 +31,7 @@ For Example:
 
 Make sure the param dict is in single quotes so that the dictionary arguments can be parsed correctly.
 
-## Helpful Commands for the Cluster
+## Helpful Commands for the Clustrer
 
 ### HFS
 
@@ -53,7 +51,7 @@ Make sure the param dict is in single quotes so that the dictionary arguments ca
 
 - Access Yarn Logs
 
-> yarn logs -applicationId application_1648648882306_28175 -log_files stdout
+> yarn logs -applicationId `application_id` -log_files stdout
 
 ## Spark
 
