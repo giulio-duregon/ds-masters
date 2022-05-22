@@ -1,19 +1,12 @@
-import numpy as np
-import pandas as pd
-import pyspark
-from pyspark.sql import SparkSession
-from pyspark.ml.evaluation import RegressionEvaluator
+import code.constants as const
+from code.unit_tests import UnitTest
+from pyspark.sql.functions import *
+from pyspark.sql.window import Window
 from pyspark.ml.recommendation import ALS
+from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.mllib.evaluation import RankingMetrics
 import time
 from datetime import datetime
-from pyspark.mllib.evaluation import RankingMetrics, MulticlassMetrics
-from pyspark.sql import Row
-from pyspark.sql.functions import *
-from pyspark.sql.window import Window
-import code.constants as const
-from code.unit_tests import UnitTest
-
 
 class Model():
     """

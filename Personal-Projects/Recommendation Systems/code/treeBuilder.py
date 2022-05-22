@@ -5,11 +5,15 @@ import pyspark
 from pyspark import SparkContext, SparkFiles
 
 def find_neighbors(i):
+    """
+    Custom function used to map AnnoyIndex.get_nns_by_vector to a PySpark RDD
+    """
     from annoy import AnnoyIndex
     ai = AnnoyIndex(250,metric='angular')
     ai.load(SparkFiles.get("tree.ann"))
     #Returns (index,nn list) tuples
     return ((x[2],ai.get_nns_by_vector(vector=x[1], n=100)) for x in i)
+
 class TreeBuilder():
     def __init__(self, items, users, rank, n_trees, search_k):
         self.items = items
@@ -26,6 +30,9 @@ class TreeBuilder():
         self.get_preds()
     
     def build_tree(self):
+        """
+        Construct an Annoy tree using ALS LFs - record build time
+        """
         start = time.time()
         #Build user Tree
         for row in self.items.rdd.collect():
@@ -40,6 +47,9 @@ class TreeBuilder():
         sc.addFile("tree.ann")
 
     def get_preds(self):
+        """
+        Get recommendations for user LFs from ALS model - record prediction time
+        """
         start = time.time()
         #Start by getting user to user similarities
         columns = ["id","recs"]

@@ -6,19 +6,19 @@ This project was a collaboration between Giulio Duregon, Jonah Potzobutt, and Jo
 
 After connecting to NYU's HPC, navigate to the directory with this repository and run `source setup.sh` in the terminal. Then add the MovieLens datasets to your `hdfs` filesystem. They must follow this naming convention: `<dataset_size>-<file_name>.csv`. For example: `large-movies.csv`. Make sure to configure necessary filepaths in the `code/constants.py` file.
 
-To create Training, Validation, and Test splits run the `make_train_val_test_splits.py` file. If you need to access the splits in your `hdfs` filesystem, they are named with the following convention: `<dataset_size>-<name_of_set>` For example, `small-train.csv`. Training is named differently depending on model type, for example `"als-small-train.csv"`.
+To create Training, Validation, and Test splits run the `make__splits.py` file. If you need to access the splits in your `hdfs` filesystem, they are named with the following convention: `<dataset_size>-<name_of_set>` For example, `small-train.csv`. Training is named differently depending on model type, for example `"als-small-train.csv"`.
 
-To train and evaluate the ALS or Baseline Recommendation System models on validation splits, use `run_model.py`.
+To train and evaluate the ALS or Baseline Recommendation System models on validation splits, use `run_model.py`. Results will be saved in a `.txt` file specified in `code/constants.py`.
 
 ## Spark Execution on the Cluster
 
-How to execute make_train_val_test_splits.py:
+How to execute make_splits.py:
 
-> spark-submit make_train_val_test_splits.py `dataset_size` `model_type`
+> spark-submit make_splits.py `dataset_size` `model_type`
 
 For example:
 
-> spark-submit make_train_val_test_splits.py small
+> spark-submit make_splits.py small
 
 How to execute run_model.py in the cluster:
 
@@ -31,7 +31,11 @@ For Example:
 
 Make sure the param dict is in single quotes so that the dictionary arguments can be parsed correctly.
 
-## Helpful Commands for the Clustrer
+## Dependencies
+
+PySpark, Annoy, and LensKit must be installed. See `report` for installation instructions.
+
+## Helpful Commands for the Cluster
 
 ### HFS
 

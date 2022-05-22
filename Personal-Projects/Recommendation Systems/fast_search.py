@@ -9,7 +9,10 @@ import sys
 import json
 
 def main(spark, als_filepath, n_trees, search_k):
-
+    """
+    Function used to load LFs from an ALS model, and build an Annoy Tree
+    for fast item recommendations. Saves results to const.RESULTS_SAVE_FILE_PATH
+    """
     test_path = f"{const.HPC_DATA_FILEPATH}als-large-train.csv"
     test = spark.read.csv(test_path)
     #For Large
@@ -26,12 +29,15 @@ def main(spark, als_filepath, n_trees, search_k):
     #Redefine validation data to use index rather than user id
     new_val = user_lfs.join(test, user_lfs.id == test.userId, how='inner').select(user_lfs.id, test.movieId, test.rating)
 
+    #Build tree and get predictions
     tree = TreeBuilder(items=item_lfs, users=user_lfs, rank=rank,n_trees = n_trees, search_k=search_k)
     tree.build_tree()
     tree.get_preds()
+    #Evaluate predictions
     util = Util(preds=tree.preds, val=new_val)
     util.run_metrics()
 
+    #Save and join instance variables to be used in the report
     tree_vars = vars(tree)
     tree_vars.update(vars(util))
 
@@ -42,6 +48,10 @@ def main(spark, als_filepath, n_trees, search_k):
         output_file.write("\n")
 
 if __name__ == "__main__":
+    """
+    Takes in three arguments, the file path of saved LFs, the number of trees to build
+    and the number of nodes to search over.
+    """
     spark = SparkSession.builder.appName('Proj').getOrCreate()
     als_filepath = sys.argv[1]
     n_trees = int(sys.argv[2])
