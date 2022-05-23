@@ -1,6 +1,6 @@
 # Project Overview
 
-This project was a collaboration between Giulio Duregon, Jonah Potzobutt, and Joby George. For detailed methodology, model analysis, and metric evaluation please refer to the report folder. Below are instructions on how to run the code on NYU's HPC cluster.
+This project was a collaboration between Giulio Duregon, Jonah Potzobutt, and Joby George. The [report](https://github.com/giulio-duregon/ds-masters/blob/main/Personal-Projects/Recommendation%20Systems/Report/Recommender-Systems-Report.pdf) was submitted as a delivarable for NYU's DS-GA 1004: Big Data.  For detailed methodology, model analysis, and metric evaluation please refer to the report folder. Below are instructions on how to run the code on NYU's HPC cluster.
 
 ## Getting Started
 
