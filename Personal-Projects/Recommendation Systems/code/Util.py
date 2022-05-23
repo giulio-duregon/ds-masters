@@ -18,7 +18,6 @@ class Util():
         self.custom_precision()
         self.custom_recall()
         
-    
     def format_preds(self):
         """
         Take self.preds, and make them into an RDD then DF with correct column names
