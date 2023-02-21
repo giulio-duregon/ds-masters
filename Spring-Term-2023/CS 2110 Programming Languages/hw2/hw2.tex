@@ -1,0 +1,479 @@
+\documentclass{exam}
+\usepackage{array}
+\title{Programming Languages Homework 2}
+\date{}
+
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tikz}
+
+\newcommand{\ID}[1]{\mathtt{#1}}
+
+\newcommand{\lam}[2]{\lambda {#1} \,.\, {#2}}
+\newcommand{\app}[2]{{#1}\,{#2}}
+\newcommand{\lm}[1]{\ensuremath{#1}}
+
+\newcommand{\numeral}[1]{\raisebox{0.65ex}{$\scriptscriptstyle\ulcorner$}{#1}\raisebox{0.65ex}{$\scriptscriptstyle\urcorner$}}
+
+
+\renewcommand{\Diamond}{}
+\begin{document} 
+
+\title{Spring 2023\\Programming Languages\\Homework 2}
+
+\maketitle
+\begin{itemize}
+\item Due on Friday, March 3, 2023 at 11:59 PM, Eastern Time (ET).   
+
+\item The homework must be submitted through NYU BrightSpace---do not send by email.  Due to timing considerations,
+   late submissions will not be accepted after the deadline above.  {\bf No exceptions will be made.}  
+
+\item I {\bf strongly recommend} that you submit your solutions well in advance of the deadline, in case you have
+  issues using the system or are unfamiliar with NYU BrightSpace.  Be very careful
+   while submitting to ensure that you follow all required steps.
+  
+\item Do not collaborate with any person for the purposes of answering homework questions.
+
+\item Use the \href{http://racket-lang.org/}{Racket Scheme interpreter} for the programming portion of the assignment.
+\emph{Important}: Be sure to select ``R5RS" from the language menu before beginning the assignment.  You can save your Scheme code to an {\tt .rkt} file by selecting \emph{Save Definitions} from the File menu.  Be sure to comment your code appropriately and submit the {\tt .rkt} file.
+
+\item When you're ready to submit your homework upload a single file, \verb#hw2-<netID>.zip#, to NYU BrightSpace. The .zip archive should contain two files: \verb#hw2-<netID>.pdf# containing solutions to the first four questions, and \verb#hw2-<netID>.rkt# containing solutions to the Scheme programming question. Make sure that running your .rkt file in the DrRacket interpreter does not cause any errors. \emph{Non-compiling programs will not be graded.}
+
+\end{itemize}
+
+
+\newpage
+
+\bracketedpoints
+\nopointsinmargin
+
+\begin{questions}
+
+\question[25] \textbf{Activation Records and Lifetimes}
+
+
+\begin{enumerate}
+\item 
+In class, we discussed an implementation issue in C relating to the \verb|printf| function. Recall that reversing the order of the arguments
+was the solution to the problem of not being able to access the format string using a constant frame pointer offset.  
+Now assume that reversing the arguments is not an option and that some other method has to be devised to solve this problem instead.  
+Formulate a different solution and explain how it works in a conversational level of detail.  The solution cannot involve a fixed
+number of arguments, or a fixed size of arguments.
+
+\item Consider a programming language ``NoRec.'' In this language, programmers cannot write programs with recursion (i.e., procedures cannot call themselves, directly
+or indirectly through other procedures). 
+
+One runtime optimization possible here is based on the observation that, without recursion, at any point of execution, each method can be active at most once. Hence, at any given moment, there is at most one active activation record for each procedure. This observation simplifies the implementation of activation records: because there is at most one copy of local variables and actual arguments for each procedure, they need not be stored on the stack; instead, they can be stored in static (global) memory at a fixed location. The benefit of this optimization is that there is less pushing and popping from the stack. 
+\begin{enumerate}
+    \item With these optimizations in place, for each of the following, explain (with reason) whether it is still needed or no longer needed in an activation record:
+    \begin{itemize}
+        \item frame pointer
+        \item return address
+    \end{itemize}
+    
+    \item How can this \emph{no recursion} behavior be enforced, i.e., what runtime and/or compile time checks are needed to ensure that there is \emph{no recursion}?
+\end{enumerate}
+
+
+\item In C++, a \emph{destructor} in object-oriented programming is a special method belonging to a class which is responsible for cleaning 
+up resources.  Destructors cannot be called explicitly. Rather, they are called automatically by the language runtime.  Thinking back to the lecture slides on activation records, where do you suppose the destructor call is triggered by the language? (No special knowledge of C++ is assumed for this question). There are two cases to consider: heap-allocated objects (using the {\bf new} and {\bf delete} operators) and stack-allocated objects which are locally declared inside a function.  How might the destructor be called in both these cases?
+
+\item Consider the following C code:
+\begin{verbatim}
+ {  int a, b, c;
+    ...
+    {   int d, e;
+        ...
+        {   int f;
+            ...
+        }
+    }
+    ...
+    {   int g, h, i;
+        ...
+    }
+    ... 
+ }
+	
+\end{verbatim}
+
+Assuming that each variable occupies four bytes, what is the minimum space required for the variables in this code? Explain your answer briefly.\\
+\verb|Hint:| Think about the possible space optimizations.
+
+\newpage
+\item Consider the following pseudo code:
+
+\begin{verbatim}
+    procedure P (A,B : real)
+    begin
+        X : real
+        
+        procedure Q (B,C : real) 
+        begin
+            Y : real
+            ...
+        end
+        
+        procedure R (A,C : real)
+        begin
+            Z : real
+            **
+            ...
+        end
+        
+        ...
+    end
+\end{verbatim}
+	
+What is the referencing environment of the line marked with an asterisk? That is, what names are visible from the specified location?\\
+\verb|Hint:| names include not just variable names, but procedure names as well.\\
+\verb|Note:| Procedures Q and R are nested directly inside procedure P. 
+
+
+\end{enumerate}
+
+
+
+\newpage
+\question[15] \textbf{Nested Subprograms}
+
+
+Consider the following pseudo-code:
+\begin{verbatim}
+procedure MAIN;
+    var X : integer = 3;
+    
+    procedure BIGSUB;
+        var A : integer = 2;
+        var B : integer = 3;
+        var C : integer = 4;
+				
+        procedure SUB1;
+            var A : integer = 5;
+            var D : integer = 1
+						
+        begin {SUB1}
+            A := B + C;     <---------------- (1)
+            print(A, B, C);
+        end; {SUB1}
+				
+        procedure SUB2(X : integer);
+            var B : integer = 1;
+            var E : integer = 8;
+            procedure SUB3;
+                var C: integer = 9;
+								
+            begin {SUB3}
+                SUB1;
+                E := B + C;
+                print(E);
+            end; {SUB3}
+						
+        begin {SUB2}
+            SUB3;
+            A := E;
+        end; {SUB2}
+				
+    begin {BIGSUB}
+        SUB2(7);
+    end; {BIGSUB}
+begin
+    BIGSUB;
+end; {MAIN}
+
+\end{verbatim}
+
+Please answer the following:
+\begin{enumerate}[a.]
+
+\item Write the name and actual parameter value of every subprogram that is called, in the order in which each is activated, 
+starting with a call to \verb|MAIN|.  Assume static scoping rules apply.
+
+{ \color{red} Example: MAIN $\rightarrow$ BIGSUB $\rightarrow$ \ldots }
+
+\item While the program above is running, which variables hold values that never change (e.g., are never assigned in the scope in which
+they exist)?  Don't forget to consider formal parameters.
+Identify the scope of the variables to be clear about which declaration you are referring to. 
+
+{ \color{red} Example: MAIN.A, BIGSUB.B, \ldots }
+
+\item Assume now that dynamic scoping rules are in effect.  Does this change the behavior of the program above?  Explain why or why not.
+
+\item  Draw the runtime stack as it will exist when execution finishes the line marked \verb|(1)|, after first invoking procedure \verb|MAIN|. Your drawing must contain the following details:
+\begin{itemize}
+\item Write the activation records in the proper order. The position of \emph{MAIN} in your stack will imply the stack orientation, 
+so no need to specify that separately.
+\item Each activation record must show the name of the procedure and its local variable bindings.
+\item Assume static linkages are used and draw them.
+\end{itemize}
+  
+\item According to the static scoping rules we've learned, can \verb|MAIN| invoke \verb|SUB3|? Give brief explanation for your answer. 
+Can \verb|SUB3| invoke \verb|MAIN|? 
+	
+\end{enumerate}
+
+
+\newpage
+\question[10] \textbf{Parameter Passing}
+
+\begin{enumerate}
+\item Trace the following code assuming all parameters are passed using \emph{call-by-name} semantics. Evaluate each formal parameter and show its value after each loop iteration (as if each one was referenced at the bottom of the loop.)
+
+{\color{red} Example:\\
+After iteration 1: a1 = ?, a2 = ?, a3 = ?, a4 = ?\\
+After iteration 2: a1 = ?, \ldots}
+
+
+\item  Perform the same trace as above, where a1, a4 are passed by \emph{call-by-name} and a2, a3, are passed by \emph{call-by-need} semantics
+
+\item Perform the same trace as above, where all arguments are passed by \emph{call-by-value}.
+     
+\end{enumerate}
+
+\begin{verbatim}
+        var i=1, j=0;
+        
+        mystery(i, i+1, i*3, j)
+        
+        procedure mystery (a1, a2, a3, a4)
+        		
+            for count from 1 to 3 do   // 1 to 3 inclusive
+              a1 = a2 + a3 + a4;
+              a4 = a4 + 1;
+            end for;
+        	
+        end procedure;
+\end{verbatim}
+
+\newpage
+
+\question[25] \textbf{Lambda Calculus}
+\begin{enumerate}
+\item This first set of problems will require you to correctly interpret the precedence and associativity rules for
+Lambda calculus and also properly identify 
+free and bound variables.  For each of the following expressions, rewrite the expression using parentheses to make the 
+structure of the expression explicit (make sure it is equivalent to the original expression).  
+Remember the ``application over abstraction'' precedence rule together with the left-associativity of application and 
+right-associativity of abstraction.  Make sure your solution covers both precedence \emph{and} associativity.
+
+Now, the expressions:
+
+\begin{enumerate}[a.]
+\item $(\lambda x.x)~y~z$
+
+{\color{red} Example: $(((\lambda x.x)~ y)~ z)$ ~~(Only associativity is necessary in this example since parentheses are already present to force abstraction)}
+
+
+\item $\lambda x~ .~\lambda y~ .~\lambda z~ .~ z~y~x$
+
+\item $\lambda x~ .~ x ~y~ \lambda z~ .~ w~ \lambda w~ .~ w~ x~ z$
+
+\item $x~ \lambda z~ .~ x~ \lambda w~ .~ w~ z~ y$
+	
+\item $\lambda z . ((\lambda s . s ~q)~ (\lambda q . q ~z))~ \lambda z . z ~z$
+
+\end{enumerate}
+
+\item Circle all of the free variables (if any) for each of the following lambda expressions:
+
+\begin{enumerate}[a.]
+\item $\lambda z ~.~ z~ x~ \lambda y~ .~ y~ z$
+\item $(\lambda x . x)~ (\lambda x . x~ (\lambda y . y)) ~z$
+\item $\lambda p . (\lambda z . f~ \lambda x . z~ y) ~p ~x$
+\item $\lambda x~ .~ x~ y~ \lambda x~ .~ y~ x$
+\item $\lambda x~ .~ x~ (x~y)$
+\end{enumerate}
+
+
+\item This next set of questions is intended to help you understand more fully why $\alpha$-conversions are needed:
+namely, to avoid having a free variable in an actual parameter captured by a formal parameter of the same name.  This 
+would result in a different (incorrect) solution.
+Remember that when performing an $\alpha$-conversion, we always change the name of the \emph{formal} parameter---never the free
+variable.   Consider the following lambda expressions.
+For each of the expressions below, state whether the expression can be legally $\beta$-reduced without
+any $\alpha$-conversion at any of the steps, according to the rule we learned in class.  
+For any expression below requiring an $\alpha$-conversion, perform the $\beta$-reduction twice: once after performing the
+$\alpha$-conversion (the correct way) and once after not performing it (the incorrect way).
+Do the two methods reduce to the same expression?
+
+ \begin{enumerate}[a.]
+ \item $(\lam{x y}{z\, x}) (\lam{x}{x\, y})$
+ 
+ \item $(\lam{x} {\lam{yz} {x\, y\, z}}) (\lam{z} {z\, x})$
+    
+ \item $(\lam{x}{x\, z}) (\lam{xz}{x\, y})$
+ 
+ \item $(\lam{x}{x\,y}) (\lam{x}{y})$
+ \end{enumerate}
+ 
+\verb|Note:| All the variables are single letters \{x, y, z\}, i.e, expression $(\lam{x} {\lam{yz} {x\, y\, z}})$ is equivalent to $(\lam{x} {\lam{y} {\lam{z} {(x\, y\, z)}})}$.
+
+
+
+\item For each of the expressions below, $\beta$-reduce each to normal form (provided a normal form exists) using
+applicative order reduction. 
+For each, perform $\alpha$ conversions where required.
+For clarity, please show each step individually---do not combine multiple reductions on a single line.
+
+\begin{enumerate}[a.]
+
+\item  $((\lambda y~ .~ z~ y)~ x) (\lambda x~ .~ x~ y)$
+
+\item  $(\lambda x~ .~ x~ x~ x)~ (\lambda x~ .~ x~ x~ x)$
+
+\item $(\lambda x~ .~ x) (\lambda y~ .~ x ~y) (\lambda z~ .~ x~ y~ z)$
+
+\item $\ID{MULT}$ \numeral{0} \numeral{3}
+
+\item $\ID{EXP}$ \numeral{2} \numeral{1}
+
+\end{enumerate}
+
+\end{enumerate}
+
+
+If the tools you are using to submit your solution supports the $\lambda$ character, please 
+use it in your solution.  If not, you may write \textbackslash{}lam as a substitute for $\lambda$.
+
+
+
+
+\newpage
+\question[25] \textbf{Scheme}
+For the questions below, turn in your solutions in a single Scheme (.rkt) file, placing your prose answers
+ in source code comments.  Multi-line comments start with \verb!#|! and end with \verb!|#!.
+
+ In all parts of this section, implement iteration using recursion. Do NOT use the iterative features such as {\tt set}, {\tt while}, {\tt display},
+{\tt begin}, etc. Do not use any function ending in ``!'' (e.g. {\tt set!}).  These are imperative features which are not permitted in this assignment.
+Use only the functional subset discussed in class and in the lecture slides.  Do not use 
+Scheme library functions in your solutions, except those noted below and in the lecture slides.
+
+Some helpful tips:
+\begin{itemize}
+\item Scheme library function {\tt list} turns an atom into a list.
+\item You might find it helpful to define separate ``helper functions'' for some of the solutions below.  Consider
+using one of the {\tt let} forms for these.
+\item the conditions in ``if" and in ``cond" are considered to be satisfied if they are not {\tt \#f}.
+ Thus {\tt (if '(A B C) 4 5)} evaluates to $4$. 
+{\tt (cond (1 4) (\#t 5))} evaluates to $4$. 
+Even {\tt (if '() 4 5) } evaluates to $4$, as in Scheme the empty list {\tt ()} is not the same as the Boolean {\tt \#f}. (Other versions of LISP conflate these two.) 
+\item You may call any functions defined in the Scheme lecture slides in your solutions. (For that reason, you may obviously include the source
+code for those functions in your solution without any need to cite the source.)
+\item You may not look at or use solutions from any other source when completing 
+these exercises. Plagiarism detection will be utilized for this portion of the assignment. {\bf DO NOT PLAGIARIZE YOUR SOLUTION.}
+\end{itemize} 
+
+Please complete the following:
+
+\begin{enumerate}
+
+\item Write a function \verb|arg-max| that expects two arguments: a unary function $f$ which maps a value to a number, and a nonempty list $A$ of 
+values. It returns the $a$ for which $(f$ $a)$ is largest among all $a \in A$. If the list A is empty, return $-1$.
+
+\begin{verbatim}
+>(define square (a) (* a a))
+> (arg-max square '(5 4 3 2 1))
+5
+
+> (define invert (a) (/ 1000 a))
+> (arg-max invert '(5 4 3 2 1))
+1
+
+> (arg-max (lambda (x) (- 0 (square (- x 3)))) '(5 4 3 2 1))
+3
+\end{verbatim}
+
+\item Implement a function {\tt zip} which takes an arbitrary number of lists as input and returns a list of those lists. If there are no input lists, return an empty list as output.(Hint: this is much simpler than you think.) 
+
+\begin{verbatim}
+>(zip '(1 2 3) '(2 3 5))
+'('(1 2 3) '(2 3 5))
+
+>(zip '(1 2 3) '(2 3 5) '(5 6 7))
+'('(1 2 3) '(2 3 5) '(5 6 7))
+\end{verbatim}
+
+\item Implement a function {\tt unzip} which given a list and a number $n$, returns the $n$th item in the list. Return the empty list if
+the index is out of range.
+
+\begin{verbatim}
+>(unzip '( (1 2 3) (5 6 7) (5 9 2 )) 1)
+'(5 6 7)
+
+>(unzip '( (1 2 3) (5 6 7) (5 9 2 )) 0)
+'(1 2 3)
+\end{verbatim}
+
+\item  Implement a function {\tt cancellist} which given two lists, will remove from \emph{both} lists all occurrences of numbers appearing in both.
+
+\begin{verbatim}
+>(cancellist '() '())
+'(() ())
+
+>(cancellist '(1 3) '(2 4))
+'((1 3) (2 4))
+
+>(cancellist '(1 2) '(2 4))
+'((1) (4))
+
+>(cancellist '(1 2 3) '(1 2 2 3 4)) 
+'(() (4))
+\end{verbatim}
+
+\item Implement function \verb|sortedmerge|, which expects two sorted lists of numbers and returns a single sorted list containing exactly the same elements as the two argument lists together. You may assume that both the input lists are always \emph{sorted}.
+
+\begin{verbatim}
+>(sortedmerge '(1 2 3) '(4 5 6))
+'(1 2 3 4 5 6)
+
+>(sortedmerge '(1 3 5) '(2 4 6))
+'(1 2 3 4 5 6)
+
+>(sortedmerge '(1 3 5) '())
+'(1 3 5)
+\end{verbatim}
+
+\item Implement a function \verb|interleave|, which expects as arguments two lists X and Y, and returns a single list obtained by choosing elements alternately, first from X and then from Y.  If the sizes of the lists are not the same, the excess elements on the longer list will appear at the end of the resulting list. Input lists can be empty as well.
+
+\begin{verbatim}
+>(interleave '(1 2 3) '(a b c))
+'(1 a 2 b 3 c)
+
+>(interleave '(1 2 3) '(a b c d e f))
+'(1 a 2 b 3 c d e f)
+
+>(interleave '(1 2 3 4 5 6) '(a b c))
+'(1 a 2 b 3 c 4 5 6)
+\end{verbatim}
+
+\item A well-known function among the functional languages is \verb|map|, which we saw in the lecture slides.  This function 
+accepts a unary function $f$ and list $l_1,\ldots,l_n$ as inputs and evaluates to a new list $f(l_1),\ldots,f(l_n)$.
+Write a similar function \verb|map2|
+which accepts a list $j_1,\ldots,j_n$, another list $\ell_1,\ldots,\ell_n$ (note they are of equal length), a unary predicate 
+$p$ and a unary function $f$.  It should evaluate to an $n$ element list which, for 
+all $1 \leq i \leq n$, yields $f(\ell_i)$ if $p(j_i)$ holds, or $\ell_i$ otherwise.
+Example:
+
+\begin{verbatim}
+(map2 '(1 2 3 4) '(2 3 4 5) (lambda (x) (> x 2)) inc)
+\end{verbatim}
+
+should yield: \verb|(2 3 5 6)|.  Additionally, your solution should evaluate to a string containing an error message if the
+two lists are not of the same size.
+
+\item Write a function \verb|compose| which is defined to perform the same function as in \emph{slide 29} of the \emph{Subprogram} lecture. That is, it should return a function that, when invoked and supplied an argument, will
+execute the function composition with the argument as input. For example, \verb|(compose inc inc)| should evaluate to \verb|#<procedure>|, whereas \verb|((compose inc inc) 5)| should evaluate to \verb|7|. Here, the unary function \verb|inc| means \verb|(lambda (x) (+ x 1))|.
+
+\end{enumerate}
+
+
+\end{questions}
+
+
+\end{document}
+
+
+
+
