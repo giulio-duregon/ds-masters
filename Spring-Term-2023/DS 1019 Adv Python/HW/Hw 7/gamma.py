@@ -57,3 +57,5 @@ def multiprocess_calculate_gamma(
         print("number of CPU cores:", cpu_count())
         print(f"Multiprocess Calculate Gamma with NUM_PROCESSES={NUM_PROCESSES}")
         print(f"Gamma(x) = {result_sum}, Total Time: {time()-ts}s")
+
+    return result_sum
